@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loki Clicks the Cosmos — Visual (Baroque Nordic)</title>
+  <style>
+    :root {
+      --gold: #c9a227;
+      --deep: #0a0d12;
+      --ice: #7fd3ff;
+      --shadow: #0b0b0b;
+      --accent: #7f00ff;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: var(--deep);
+      color: #fff;
+      font-family: "Cinzel", "GFS Didot", "Times New Roman", serif;
+    }
+
+    /* Fullscreen world background */
+    #world-bg {
+      position: fixed;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: contrast(1.05) brightness(0.85) saturate(1.05);
+      transition: background-image 1s ease-in-out, filter 1s;
+    }
+
+    /* Baroque vignette overlay */
+    #vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%);
+    }
+
+    /* Gold ornamental frame */
+    .frame {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      border: 20px solid transparent;
+      box-sizing: border-box;
+    }
+    .frame::before,
+    .frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 6px double var(--gold);
+      filter: drop-shadow(0 0 6px rgba(201,162,39,0.4));
+      mix-blend-mode: screen;
+    }
+
+    /* Title */
+    .title {
+      position: fixed;
+      top: 2vh;
+      width: 100%;
+      text-align: center;
+      font-size: clamp(24px, 4vw, 48px);
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 8px rgba(255,255,255,0.15), 0 0 22px rgba(127,0,255,0.2);
+      animation: glow 3s infinite alternate;
+      z-index: 4;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 8px rgba(255,255,255,0.2), 0 0 16px rgba(201,162,39,0.25); }
+      to   { text-shadow: 0 0 18px rgba(255,255,255,0.35), 0 0 36px rgba(127,0,255,0.35); }
+    }
+
+    /* Element buttons bar */
+    .bar {
+      position: fixed;
+      bottom: 4vh;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: clamp(12px, 2vw, 28px);
+      z-index: 5;
+    }
+
+    .elem-btn {
+      width: clamp(64px, 10vw, 110px);
+      height: clamp(64px, 10vw, 110px);
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(2px);
+      box-shadow: 0 0 12px rgba(201,162,39,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .2s, background .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .elem-btn:hover { transform: scale(1.05); }
+    .elem-btn:active { transform: scale(0.97); }
+
+    .elem-btn img, .elem-btn svg {
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 3px rgba(255,255,255,0.15));
+    }
+
+    /* Sprites that float & fade */
+    .sprite {
+      position: fixed;
+      width: clamp(60px, 8vw, 120px);
+      height: clamp(60px, 8vw, 120px);
+      pointer-events: none;
+      animation: rise 3.8s ease-out forwards, spin 6s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.15));
+      z-index: 3;
+    }
+
+    @keyframes rise {
+      0% { transform: translate(-50%, 0) scale(0.8); opacity: .0; }
+      15% { opacity: 1; }
+      100% { transform: translate(-50%, -40vh) scale(1.15); opacity: 0; }
+    }
+
+    @keyframes spin {
+      0% { rotate: 0deg; }
+      100% { rotate: 360deg; }
+    }
+
+    /* Admin overlay glitch */
+    #admin {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      backdrop-filter: blur(2px);
+      animation: adminFade .8s ease forwards;
+    }
+
+    #admin img {
+      max-width: 55vw;
+      max-height: 55vh;
+      filter: hue-rotate(220deg) contrast(1.3) saturate(1.2) drop-shadow(0 0 18px rgba(127,0,255,0.35));
+      animation: glitch 0.6s steps(2) 3;
+    }
+
+    @keyframes adminFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0,0) skew(0deg); }
+      20% { transform: translate(-6px, 3px) skew(2deg); }
+      40% { transform: translate(5px, -2px) skew(-1deg); }
+      60% { transform: translate(-2px, 2px) skew(1deg); }
+      80% { transform: translate(2px, -3px) skew(-2deg); }
+      100% { transform: translate(0,0) skew(0deg); }
+    }
+
+    /* Audio toggle */
+    #audioToggle {
+      position: fixed;
+      right: 2vh;
+      top: 2vh;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 6;
+      box-shadow: 0 0 8px rgba(201,162,39,0.2);
+    }
+    #audioToggle svg { width: 65%; height: 65%; fill: var(--gold); }
+
+  </style>
+</head>
+<body>
+  <div id="world-bg"></div>
+  <div id="vignette"></div>
+  <div class="frame"></div>
+
+  <div class="title">LOKI CLICKS THE COSMOS</div>
+
+  <button id="audioToggle" aria-label="toggle-audio"></button>
+
+  <div class="bar">
+    <button class="elem-btn" data-type="Fire" aria-label="Fire">
+      <!-- simple flame svg -->
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 2C22 14 42 18 34 34c-3-7-8-10-12-10-6 0-10 6-10 12 0 12 9 20 20 20s20-8 20-20C52 18 38 12 32 2z" fill="#ff5a00"/>
+      </svg>
+    </button>
+    <button class="elem-btn" data-type="Ice" aria-label="Ice">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 2l6 10h10l-6 10 6 10H38l-6 10-6-10H16l6-10-6-10h10z" fill="#7fd3ff"/>
+      </svg>
+    </button>
+    <button class="elem-btn" data-type="Shadow" aria-label="Shadow">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="20" fill="#111" stroke="#444" stroke-width="4"/>
+      </svg>
+    </button>
+    <button class="elem-btn" data-type="Sound" aria-label="Sound">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 24H14v16h10l14 14V10z" fill="#c9a227"/>
+        <path d="M42 22c4 4 4 16 0 20M48 18c6 6 6 22 0 28" stroke="#c9a227" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Admin overlay -->
+  <div id="admin">
+    <img src="https://images.unsplash.com/photo-1643234406398-3709271f8c7c?q=80&w=1200&auto=format&fit=crop" alt="Admin" />
+  </div>
+
+  <!-- Background music -->
+  <audio id="bgm" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/03/30/audio_6d2ae6a9cd.mp3" type="audio/mpeg" />
+  </audio>
+
+  <script>
+    // --- CONFIG ---
+    const ADMIN_CHANCE = 0.18;
+    const TAPS_PER_WORLD = 10;
+
+    const worldImages = [
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1920&auto=format&fit=crop", // aurora
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1920&auto=format&fit=crop", // fjord
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1920&auto=format&fit=crop", // baroque ceiling
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1920&auto=format&fit=crop", // repeat baroque
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1920&auto=format&fit=crop", // aurora repeat
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1920&auto=format&fit=crop"  // fjord repeat
+    ];
+
+    const spriteImages = [
+      "https://images.unsplash.com/photo-1511203466129-824e631920d4?q=80&w=512&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=512&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=512&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=512&auto=format&fit=crop"
+    ];
+
+    const audio = document.getElementById('bgm');
+    const audioToggle = document.getElementById('audioToggle');
+    const adminOverlay = document.getElementById('admin');
+    const worldBg = document.getElementById('world-bg');
+
+    let counter = 0;
+    let worldIndex = 0;
+    let audioEnabled = false;
+
+    // Set initial world
+    worldBg.style.backgroundImage = `url(${worldImages[0]})`;
+
+    function setWorldBackground(index) {
+      const img = worldImages[index % worldImages.length];
+      worldBg.style.backgroundImage = `url(${img})`;
+      // subtle filter switch
+      worldBg.style.filter = `contrast(${1 + Math.random() * 0.2}) brightness(${0.8 + Math.random() * 0.2}) saturate(${1 + Math.random() * 0.2})`;
+    }
+
+    function spawnSprite() {
+      const sprite = document.createElement('img');
+      sprite.className = 'sprite';
+      sprite.src = spriteImages[Math.floor(Math.random() * spriteImages.length)];
+      const x = Math.random() * (window.innerWidth * 0.8) + window.innerWidth * 0.1;
+      const y = window.innerHeight * 0.7; // start near the bottom
+      sprite.style.left = x + 'px';
+      sprite.style.top = y + 'px';
+      document.body.appendChild(sprite);
+
+      sprite.addEventListener('animationend', () => sprite.remove());
+    }
+
+    function godAdminIntervention(type) {
+      adminOverlay.style.display = 'flex';
+      setTimeout(() => {
+        adminOverlay.style.display = 'none';
+      }, 800);
+    }
+
+    function spawn(type) {
+      counter++;
+
+      // admin chance
+      if (Math.random() < ADMIN_CHANCE) {
+        counter = Math.max(0, counter - 1);
+        godAdminIntervention(type);
+        return;
+      }
+
+      // normal spawn
+      spawnSprite();
+
+      if (counter % TAPS_PER_WORLD === 0) {
+        worldIndex++;
+        setWorldBackground(worldIndex);
+        // extra burst of sprites (mutation)
+        for (let i = 0; i < 4; i++) setTimeout(spawnSprite, i * 150);
+      }
+    }
+
+    // Hook up buttons
+    document.querySelectorAll('.elem-btn').forEach(btn => {
+      btn.addEventListener('click', () => spawn(btn.dataset.type));
+    });
+
+    // Audio toggle
+    function renderAudioIcon() {
+      audioToggle.innerHTML = audioEnabled
+        ? `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06A4.982 4.982 0 0 0 16.5 12zm2.5 0c0 3.03-1.67 5.64-4.15 6.97l1.77 1.77C19.19 19.24 21 15.85 21 12s-1.81-7.24-4.88-8.74l-1.77 1.77C18.33 6.36 20 8.97 20 12z"/></svg>`
+        : `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c0 1.77-1.02 3.29-2.5 4.03V7.97c1.48.74 2.5 2.26 2.5 4.03zM3 10v4h4l5 5V5L7 10H3zm13.44-.94L21.5 14.1l-1.27 1.27-5.06-5.06 1.27-1.27zM2.1 3.51L3.51 2.1 21.9 20.49 20.49 21.9 2.1 3.51z"/></svg>`;
+    }
+
+    renderAudioIcon();
+
+    audioToggle.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      if (audioEnabled) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
+      renderAudioIcon();
+    });
+
+    // try autoplay
+    (async () => {
+      try {
+        await audio.play();
+        audioEnabled = true;
+      } catch (e) {
+        audioEnabled = false; // user gesture required
+      }
+      renderAudioIcon();
+    })();
+  </script>
+</body>
+</html>
